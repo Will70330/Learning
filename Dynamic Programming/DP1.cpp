@@ -255,6 +255,10 @@ bool canConstruct(string target, vector<string> wordBank){
  * 
  * you may reuse elements of the word bank as many times as needed
  * 
+ * Brute: time -> O(n^m * m), space -> O(m^2)
+ * 
+ * Memo: time -> O(n*m^2), space -> O(m^2)
+ * 
  * @return int 
  */
 int countConstruct(string target, vector<string> wordBank, map<string, int>& memo){
@@ -265,20 +269,54 @@ int countConstruct(string target, vector<string> wordBank, map<string, int>& mem
 
     for(int i = 0; i < wordBank.size(); i++){
         if(target.find(wordBank[i]) == 0){
-            int count = countConstruct(target.erase(0, wordBank[i].size()), wordBank, memo); 
+            string substr = target;
+            substr.erase(0, wordBank[i].size());
+            int count = countConstruct(substr, wordBank, memo); 
             tot += count; 
-            if(count > 0){
-                memo[target] = count + 1;
-                return count;
-            }
         }
     }
-    memo[target] = 0;
-    return 0; 
+    memo[target] = tot;
+    return tot; 
 }
 int countConstruct(string target, vector<string> wordBank){
     map<string, int> mp;
     return countConstruct(target, wordBank, mp); 
+}
+
+/**
+ * Write a function `allConstruct(target, wordBank)` that accepts a target string and an array of strings
+ * 
+ * The function should return a 2D container containing all of the ways that the target can be constructed
+ * by concatenating elements of the wordbank. Each element of the 2D array should represent ONE combination
+ * that contructs the target. 
+ * 
+ * You may reuse elements of the word bank as many times as needed
+ * 
+ * @return vector<vector<string>>
+ */
+vector<vector<string>> allConstruct(string target, vector<string> wordBank, map<string, vector<string>>& memo){
+    return {{}};
+}
+vector<vector<string>> allConstruct(string target, vector<string> wordBank){
+    if(target == "") return {{}}; 
+
+    vector<vector<string>> result; 
+
+    for(int i = 0; i < wordBank.size(); i++){
+        if(target.find(wordBank[i]) == 0){
+            string substr = target;
+            substr.erase(0, wordBank[i].size());
+            vector<vector<string>> substr_combos = allConstruct(substr, wordBank); 
+            vector<vector<string>> target_combos;
+            for(int j = 0; j < substr.size(); j++){
+                target_combos.push_back({wordBank[i]});
+                target_combos.insert(target_combos.begin(), substr_combos[j]); 
+            }
+            result.insert(result.begin(), target_combos.begin(), target_combos.end());
+        }
+    }
+
+    return result; 
 }
 
 int main(){
@@ -333,10 +371,26 @@ int main(){
     // cout << "canConstruct 4:    " << canConstruct("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef", {"e", "ee", "eee", "eeee", "eeeee"}) << endl; // false
 
     // P1.7 countconstruct
-    cout << "countConstruct 1:    " << countConstruct("abcdef", {"ab", "abc", "cd", "def", "abcd"}) << endl; //  2
-    cout << "countConstruct 2:    " << countConstruct("skateboard", {"bo", "rd", "ate", "t", "ska", "sk", "boar"}) << endl; // 1
-    cout << "countConstruct 3:    " << countConstruct("enterapotentpot", {"a", "p", "ent", "enter", "ot", "o", "t"}) << endl; // 0
-    cout << "countConstruct 4:    " << countConstruct("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef", {"e", "ee", "eee", "eeee", "eeeee"}) << endl; // 4
+    // cout << "countConstruct 1:    " << countConstruct("purple", {"purp", "p", "ur", "le", "purpl"}) << endl; //  2
+    // cout << "countConstruct 1:    " << countConstruct("abcdef", {"ab", "abc", "cd", "def", "abcd"}) << endl; //  1
+    // cout << "countConstruct 2:    " << countConstruct("skateboard", {"bo", "rd", "ate", "t", "ska", "sk", "boar"}) << endl; // 0
+    // cout << "countConstruct 3:    " << countConstruct("enterapotentpot", {"a", "p", "ent", "enter", "ot", "o", "t"}) << endl; // 4
+    // cout << "countConstruct 4:    " << countConstruct("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef", {"e", "ee", "eee", "eeee", "eeeee"}) << endl; // 0
+
+    // P1.8 allConstruct
+    vector<vector<string>> result; 
+    cout << "allConstruct 1:    \n";
+    result = allConstruct("purple", {"purp", "p", "ur", "le", "purpl"}); //  2
+    for (int i =0; i < result.size(); i++){
+        for(int j = 0; j < result[i].size(); j++){
+            cout << result[i][j] << " ";
+        }
+        cout << endl; 
+    }
+    // cout << "allConstruct 1:    " << allConstruct("abcdef", {"ab", "abc", "cd", "def", "abcd"}) << endl; //  1
+    // cout << "allConstruct 2:    " << allConstruct("skateboard", {"bo", "rd", "ate", "t", "ska", "sk", "boar"}) << endl; // 0
+    // cout << "allConstruct 3:    " << allConstruct("enterapotentpot", {"a", "p", "ent", "enter", "ot", "o", "t"}) << endl; // 4
+    // cout << "allConstruct 4:    " << allConstruct("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef", {"e", "ee", "eee", "eeee", "eeeee"}) << endl; // 0
 
     return 0;
 }
